@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace表示命名空间唯一 -->
+<mapper namespace="com.ttms.core.dao.ProjectDao">
+	<sql id="selectProjectListWhere">
+		<where>
+			<if test="name !=null">
+				name like "%"#{name}"%"
+			</if>
+		</where>
+	</sql>
+
+	<!-- 根据项目名称查询项目信息 -->
+	<select id="selectProjectList" parameterType="project" resultType="project">
+		select id,code,name,beginDate,endDate,valid
+		from tms_projects 
+		<include refid="selectProjectListWhere" />
+		<!-- 执行分页查询 -->
+		<if test="start !=null and rows !=null">
+			limit #{start},#{rows}
+		</if>
+	</select>
+	
+	<!-- 根据项目名称查询项目总记录数 -->
+	<select id="selectProjectListCount" parameterType="project" resultType="Integer">
+		select count(*) from tms_projects
+		<include refid="selectProjectListWhere" />
+	</select>
+	
+	<!-- 根据项目id删除项目 -->
+	<delete id="deleteProject" parameterType="Integer">
+		delete from tms_projects where id=#{id}
+	</delete>
+	
+	<!-- 添加项目 -->
+	<insert id="createProject" parameterType="project">
+		insert into tms_projects(
+			code,
+			name,
+			beginDate,
+			endDate,
+			note,
+			createdTime
+		) 
+		values(
+			#{code},
+			#{name},
+			#{beginDate},
+			#{endDate},
+			#{note},
+			#{createdTime}
+		)
+	</insert>
+	<!-- 修改项目，通过id查询项目 -->
+	<select id="getProjectById" parameterType="Integer" resultType="project">
+		select * from tms_projects where id=#{id}
+	</select>
+	<!-- 修改项目,执行保存修改 -->
+	<update id="updateProject" parameterType="project">
+		update tms_projects
+		<set>
+			<if test="code !=null">
+				code=#{code},
+			</if>
+			<if test="name!=null">
+	            name=#{name},
+	        </if>
+			<if test="beginDate !=null">
+				beginDate=#{beginDate},
+			</if>
+			<if test="endDate !=null">
+				endDate=#{endDate},
+			</if>
+			<if test="note !=null">
+				note=#{note},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	<!-- 批量删除项目 -->
+	<delete id="deleteChecked">
+		delete from tms_projects where id in
+		<foreach collection="array" item="ids" index="no" 
+		open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</delete>
+	<!-- 批量禁用项目 -->
+	<update id="updateStateNo">
+		update tms_projects set valid=0
+		where id in
+		<foreach collection="array" item="ids" index="no" 
+		open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</update>
+	
+	<!-- 批量启用项目 -->
+	<update id="updateStateOk">
+		update tms_projects set valid=1
+		where id in
+		<foreach collection="array" item="ids" index="no" 
+		open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</update>
+</mapper>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>用户管理</title>
+
+		<!--核心Css-->
+		<link rel="stylesheet" href="../bootstrap/css/bootstrap.css" />
+		<!--主题文件-->
+		<!--引入JQuery-->
+		<script type="text/javascript" src="../js/jquery-2.1.0.js"></script>
+		<!--Javascript-->
+		<script type="text/javascript" src="../bootstrap/js/bootstrap.js"></script>
+		<!-- 导入表单校验JS -->
+		<script src="../js/check.js" type="text/javascript" charset="utf-8"></script>
+
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="container-fluid">
+				<!-- 一、头部信息，导航栏显示用户信息 
+			实现分析：
+		-->
+				<header>
+					<!-- 导航栏 -->
+					<nav class="navbar navbar-default" style="background: #000000;">
+						<div class="container-fluid">
+							<!-- Brand and toggle get grouped for better mobile display -->
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+								 aria-expanded="false">
+									<span class="sr-only">Toggle navigation</span>
+								</button>
+								<a class="navbar-brand" href="../index.html" style="color: #FFFFFF;">
+									<div style="position: relative; margin-top: -15px; height: 50px; line-height: 48px;">
+										<img src="../img/tb.png" title="返回首页" alt="返回首页" width="50px" height="50px">
+									</div>
+								</a>
+							</div>
+
+							<!-- Collect the nav links, forms, and other content for toggling -->
+							<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+								<ul class="nav navbar-nav">
+									<li class="dropdown">
+										<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+										 style="color: #FFFFFF;">产品管理<span class="caret"></span></a>
+										<ul class="dropdown-menu">
+											<li><a href="../product/project_list.html">项目管理</a></li>
+											<li><a href="../product/team_list.html">团目管理</a></li>
+											<li role="separator" class="divider"></li>
+											<li><a href="../product/type_list.html">产品分类</a></li>
+											<li role="separator" class="divider"></li>
+											<li><a href="../product/attachment.html">附件管理</a></li>
+										</ul>
+									</li>
+									<li class="dropdown">
+										<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+										 style="color: #FFFFFF;">系统管理<span class="caret"></span></a>
+										<ul class="dropdown-menu">
+											<li><a href="role_list.html">角色管理</a></li>
+											<li><a href="menu_list.html">菜单管理</a></li>
+											<li><a href="user_list.html">用户管理</a></li>
+										</ul>
+									</li>
+								</ul>
+								<ul class="nav navbar-nav navbar-right">
+									<li><a href="#" style="color: #FFFFFF;">用户名：</a></li>
+									<li><a href="#" style="color: #FFFFFF;">value</a></li>
+									<li><a href="../Login.html" style="color: #FFFFFF;">退出</a></li>
+								</ul>
+							</div><!-- /.navbar-collapse -->
+						</div><!-- /.container-fluid -->
+					</nav>
+				</header>
+
+				<!-- 当前路径 -->
+				<div class="content-wrapper">
+					<!-- Content Header (Page header) -->
+					<section class="content-header">
+						<ol class="breadcrumb">
+							<li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+							<li class="active"></li>
+						</ol>
+					</section>
+
+					<!-- Main content -->
+					<section class="content">
+
+					</section>
+					<!-- /.content -->
+				</div>
+
+				<!-- 二、附属信息，侧边栏、导航条（用于触发到<article>） 
+			实现分析：用于显示项目的导航条，由一系列的导航项组成
+			
+		
+		<aside>
+			
+		</aside> -->
+
+				<!-- 三、页内主元素，一项功能的文本部分 
+			实现分析：可以使用js，根据 导航项链接 动态创建（默认为空）
+		-->
+				<article>
+					<div class="container">
+						<!-- 页面导航 -->
+						
+						<div class="page-header">
+							<div class="page-title" style="padding-bottom: 5px">
+								<ol class="breadcrumb">
+									<li class="active" id="titleId">新增用户</li>
+								</ol>
+							</div>
+						</div>
+						<div class="row col-md-12" style="text-align: center; color: white;">
+							<form action="#" id="form_user">
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">用户名：
+										<input type="text" id="username" onfocus="showTips('span_username','用户名长度不能小于6位!')" onblur="checkUsername()"
+										 onkeyup="checkUsername()" />
+									</div>
+									<div style="text-align: left;" class="col-sm-4"><span id="span_username"></span></div>
+								</div><br />
+
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">密&nbsp;&nbsp;&nbsp;&nbsp;码：
+										<input type="password" id="password" onfocus="showTips('span_password','密码长度不能小于6位!')" onblur="checkPassword()"
+										 onkeyup="checkPassword()" />
+									</div>
+									<div style="text-align: left;" class="col-sm-4"><span id="span_password"></span></div>
+								</div><br />
+
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">确认密码:
+										<input type="password" id="repassword" onfocus="showTips('span_repassword','两次密码必须一致!')" onblur="checkRePassword()"
+										 onkeyup="checkRePassword()" />
+									</div>
+									<div style="text-align: left;" class="col-sm-4"><span id="span_repassword"></span></div>
+								</div><br />
+
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">邮&nbsp;&nbsp;&nbsp;&nbsp;箱：<input type="text" id="email" onfocus="showTips('span_email','请输入正确的邮箱!')" onblur="checkEmail()" /></div>
+									<div style="text-align: left;" class="col-sm-4"><span id="span_email"></span></div>
+								</div><br />
+
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">手机号：<input type="text" id="phonenumber" onfocus="showTips('span_phonenumber','请输入正确的手机号!')"
+										 onblur="checkMobile()" />
+									</div>
+									<div style="text-align: left;" class="col-sm-4"><span id="span_phonenumber"></span></div>
+								</div><br />
+
+								<div class="row">
+									<div class="col-sm-3"></div>
+									<div class="col-sm-5">角色：
+										<input type="radio" name="valid" checked value="1">系统管理员&nbsp;&nbsp;&nbsp;
+										<input type="radio" name="valid" value="0">产品经理&nbsp;&nbsp;&nbsp;
+										<input type="radio" name="valid" value="0">团负责人
+									</div>
+								</div><br />
+
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										<input type="button" class="btn btn-primary" id="btn-ok" value="确定">
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										<input type="button" value="返回" class="btn btn-warning" id="btn-return">
+									</div>
+								</div>
+
+							</form>
+						</div>
+					</div>	
+				</article>
+
+				<!-- 四、底部信息，当前版本等
+			实现分析：一直存在
+		 -->
+				<footer>
+					<div class="content-wrapper">
+						<!-- Content Header (Page header) -->
+						<div class="content-header breadcrumb" style="text-align: center; width: 100%; position: fixed; bottom: 0px; ">
+							<strong>Copyright &copy; 2020 <a href="https://fanyi.baidu.com/?aldtype=16047#en/zh/Silent%20combination">
+									Silent combination </a>.</strong> All rights reserved.
+							<br /> <strong>Version</strong>&nbsp;1.0
+						</div>
+					</div>
+				</footer>
+			</div>
+		</div>
+	</body>
+</html>

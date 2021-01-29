@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttms.core.dao.TeamDao">
+	<!-- sql片段where -->
+	<sql id="selectTeamListWhere">
+		<where>
+			<if test="name !=null">
+				name LIKE "%"#{name}"%"
+			</if>
+		</where>
+	</sql>
+
+	<!-- 根据团目名称、当前项目名查询团目信息，关联查询 -->
+	<select id="selectTeamList" parameterType="Team"
+		resultType="Team">
+		SELECT
+		  id,
+		  name,
+		  projectId,
+		  valid
+		FROM tms_teams 
+		<include refid="selectTeamListWhere" />
+		<!-- 执行分页查询 -->
+		
+		<if test="start !=null and rows!=null ">
+			LIMIT #{start},#{rows}
+		</if>
+	</select>
+	<!-- 查询团目总记录数 -->
+	<select id="selectTeamListCount" parameterType="Team"
+		resultType="Integer">
+		select count(*) from tms_teams
+		<include refid="selectTeamListWhere" />
+	</select>
+	
+	<!-- 根据团目id删除团目 -->
+	<delete id="deleteTeam" parameterType="Integer">
+		delete from tms_teams where id=#{id}
+	</delete>
+	<!-- 批量删除团目 -->
+	<delete id="deleteTeamChecked">
+		delete from tms_teams where id in
+		<foreach collection="array" item="ids" index="no" 
+		open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</delete>
+	<!-- 批量禁用团目 -->
+	<update id="updateTeamStateNo">
+		update tms_teams set valid=0
+		where id in
+		<foreach collection="array" item="ids" index="no" 
+		open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</update>
+	
+	<!-- 批量启用团目 -->
+	<update id="updateTeamStateOk">
+		update tms_teams set valid=1
+		where id in
+		<foreach collection="array" item="ids" index="no" 
+		open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</update>
+</mapper>

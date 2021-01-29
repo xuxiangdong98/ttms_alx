@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace表示命名空间唯一 -->
+<mapper namespace="com.ttms.core.dao.UserDao">
+	<sql id="selectUserListWhere">
+		<where>
+			<if test="username!=null">
+				username like "%"#{username}"%"
+			</if>
+		</where>
+	</sql>
+	<!-- 根据帐号和密码查询用户信息 -->
+	<select id="findUser" parameterType="String" resultType="user">
+		select *
+		from sys_users where username=#{username} and password=#{password}
+	</select>
+
+
+
+	<!-- 根据用户名称查询用户信息 -->
+	<select id="selectUserList" parameterType="User"
+		resultType="User">
+		select id,username,email,mobile,valid
+		from sys_users
+		<include refid="selectUserListWhere" />
+		<!-- 执行分页查询 -->
+		<if test="start !=null and rows !=null">
+			limit #{start},#{rows}
+		</if>
+	</select>
+
+	<!-- 根据用户名称查询用户总记录数 -->
+	<select id="selectUserListCount" parameterType="User"
+		resultType="Integer">
+		select count(*) from sys_users
+		<include refid="selectUserListWhere" />
+	</select>
+
+	<!-- 根据用户id删除用户 -->
+	<delete id="deleteUser" parameterType="Integer">
+		delete from
+		sys_users where
+		id=#{id}
+	</delete>
+
+	<!-- 修改用户，通过id查询用户 -->
+	<select id="getUserById" parameterType="Integer"
+		resultType="User">
+		select * from sys_users where id=#{id}
+	</select>
+	<!-- 修改用户,执行保存修改 -->
+	<update id="updateUser" parameterType="user">
+		update sys_users
+		<set>
+			<if test="username!=null">
+	            username=#{username},
+	        </if>
+			<if test="email !=null">
+				email=#{email},
+			</if>
+			<if test="mobile !=null">
+				mobile=#{mobile},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+</mapper>

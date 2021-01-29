@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttms.core.dao.AlxScenicDao">
+	<sql id="selectAlxScenicListWhere">
+		<where>
+			<if test="scenic_name !=null">
+				scenic_name like "%"#{scenic_name}"%"
+			</if>
+		</where>
+	</sql>
+	<!-- 根据景点名称查询景点信息 -->
+	<select id="findAlxScenicList" parameterType="AlxScenic"
+		resultType="AlxScenic">
+		select
+		scenic_id,
+		scenic_name,
+		scenic_img,
+		scenic_price,
+		scenic_phone,
+		scenic_evaluate,
+		scenic_startDate,
+		scenic_endDate
+
+		from alx_scenic
+		<include refid="selectAlxScenicListWhere" />
+		<!-- 执行分页查询 -->
+		<if test="start !=null and rows !=null">
+			limit #{start},#{rows}
+		</if>
+	</select>
+
+	<!-- 根据景点名称查询景点总记录数 -->
+	<select id="selectAlxScenicListCount" parameterType="AlxScenic"
+		resultType="Integer">
+		select count(*) from alx_scenic
+		<include refid="selectAlxScenicListWhere" />
+	</select>
+
+	<!-- 通过id查景点详情 -->
+	<select id="getScenicById" parameterType="Integer"
+		resultType="AlxScenic">
+		select * from alx_scenic where scenic_id=#{scenic_id}
+	</select>
+
+	<!-- 景点立即预订，向景区预定订单中添加 -->
+	<insert id="createReserveScenic" parameterType="ReserveScenic">
+		insert into
+		reserve_scenic(
+		alx_uid,
+		scenic_id,
+		reserve_startDate
+		)
+		values(
+		#{alx_uid},
+		#{scenic_id},
+		#{reserve_startDate}
+		)
+	</insert>
+	<!-- 查是否重复 -->
+	<select id="findReserveScenicByscenic_id"
+		parameterType="ReserveScenic" resultType="ReserveScenic">
+		select * from reserve_scenic
+		where alx_uid=#{alx_uid} and scenic_id=#{scenic_id}
+	</select>
+	<!-- 查询预订状态是否处理 -->
+	<select id="findResValidByscenic_id"
+		parameterType="ReserveScenic" resultType="ReserveScenic">
+		select reserve_valid from reserve_scenic
+		where alx_uid=#{alx_uid} and scenic_id=#{scenic_id}
+	</select>
+
+	<!-- ttms添加景点 -->
+	<insert id="createScenic" parameterType="AlxScenic">
+		insert into alx_scenic(
+		scenic_img,
+		scenic_name,
+		scenic_price,
+		scenic_evaluate,
+		scenic_phone,
+		scenic_introduce
+		)
+		values(
+		#{scenic_img},
+		#{scenic_name},
+		#{scenic_price},
+		#{scenic_evaluate},
+		#{scenic_phone},
+		#{scenic_introduce}
+		)
+	</insert>
+	<!-- 根据景点id删除ttms景点 -->
+	<delete id="deleteScenic" parameterType="Integer">
+		delete from alx_scenic
+		where scenic_id=#{id}
+	</delete>
+	<!-- 修改景点,ttms执行保存修改 -->
+	<update id="updateScenic" parameterType="AlxScenic">
+		update alx_scenic
+		<set>
+			<if test="scenic_name !=null">
+				scenic_name = #{scenic_name},
+			</if>
+			<if test="scenic_price !=null">
+	           scenic_price = #{scenic_price},
+	        </if>
+			<if test="scenic_evaluate !=null">
+				scenic_evaluate = #{scenic_evaluate},
+			</if>
+			<if test="scenic_phone !=null">
+				scenic_phone = #{scenic_phone},
+			</if>
+			<if test="scenic_introduce !=null">
+				scenic_introduce = #{scenic_introduce},
+			</if>
+			<if test="scenic_heat !=null">
+				scenic_heat = #{scenic_heat}
+			</if>
+		</set>
+		where scenic_id=#{scenic_id}
+	</update>
+	
+	<!-- ttms查询景点预订列表 -->
+	<resultMap type="ReserveScenic" id="AllAlxUserReserveScenicResult">
+		<id property="reserve_sid" column="reserve_sid" />
+		<result property="reserve_sid" column="reserve_sid" />
+		<result property="reserve_valid" column="reserve_valid" />
+		<result property="reserve_startDate" column="reserve_startDate" />
+		<!-- 多对多关联映射:collection -->
+		<collection property="alxUsers" ofType="AlxUser">
+			<id property="alx_uid" column="alx_uid" />
+			<result property="alx_uname" column="alx_uname" />
+		</collection>
+		<collection property="alxScenics" ofType="AlxScenic">
+			<id property="scenic_id" column="scenic_id" />
+			<result property="scenic_name" column="scenic_name" />
+		</collection>
+	</resultMap>
+	<select id="selectAllAlxUserReserveScenicList" parameterType="ReserveScenic"
+		resultMap="AllAlxUserReserveScenicResult">
+		select rc.*,ar.alx_uname,ac.scenic_name 
+		from reserve_scenic rc 
+		JOIN alx_user ar ON rc.alx_uid = ar.alx_uid
+		JOIN alx_scenic ac ON rc.scenic_id = ac.scenic_id
+		ORDER BY reserve_sid asc
+		limit #{start},#{rows}
+	</select>
+
+	<!-- ttms查询景点预订列表总记录数-->
+	<select id="selectAllAlxUserReserveScenicListCount" parameterType="ReserveScenic" resultType="Integer">
+		select count(rc.reserve_sid) 
+		from reserve_scenic rc
+		JOIN alx_user ar ON rc.alx_uid = ar.alx_uid
+		JOIN alx_scenic ac ON rc.scenic_id = ac.scenic_id
+	</select>
+	
+	<!-- 删除ttms用户已预定景点 -->
+	<delete id="deleteAlxUserReserveScenic" parameterType="Integer">
+		delete from reserve_scenic where reserve_sid=#{reserve_sid}
+	</delete>
+	<!-- 修改处理ttms用户已预定景点 -->
+	<update id="updateAlxUserReserveScenic" parameterType="Integer">
+		update reserve_scenic set reserve_valid=1 where reserve_sid=#{reserve_sid}
+	</update>
+	
+	<!-- 查询热度最高的景点 -->
+	<select id="findHotScenic" resultType="AlxScenic">
+		select * from alx_scenic where scenic_heat=(select max(scenic_heat) from alx_scenic)
+	</select>
+	
+	
+	<!-- 景点收藏，向景点收藏订单中添加 -->
+	<insert id="createCollectScenic" parameterType="CollectScenic">
+		insert into
+		collect_scenic(
+		alx_uid,
+		scenic_id,
+		collect_startDate
+		)
+		values(
+		#{alx_uid},
+		#{scenic_id},
+		#{collect_startDate}
+		)
+	</insert>
+	<!-- 查是否重复 -->
+	<select id="findCollectScenicByscenic_id"
+		parameterType="CollectScenic" resultType="CollectScenic">
+		select * from collect_scenic
+		where alx_uid=#{alx_uid} and scenic_id=#{scenic_id}
+	</select>
+	
+	<!-- ttms爱旅行用户景点预订统计 -->
+	<select id="getScenicReserve" resultType="AlxSSR">
+		SELECT scenic_name as name,count(1) as value
+		FROM reserve_scenic
+		JOIN alx_scenic ON alx_scenic.scenic_id=reserve_scenic.scenic_id
+		GROUP BY scenic_name;
+	</select>
+	<!-- ttms爱旅行用户景点收藏量统计 -->
+	<select id="getScenicCollect" resultType="AlxSSR">
+		SELECT scenic_name as name,count(1) as value
+		FROM collect_scenic
+		JOIN alx_scenic ON alx_scenic.scenic_id=collect_scenic.scenic_id
+		GROUP BY scenic_name;
+	</select>
+	<!-- ttms爱旅行用户比例统计 -->
+	<select id="getScenicAlxUser" resultType="AlxSSR">
+		SELECT alx_usex as name,count(1) as value
+		FROM alx_user
+		GROUP BY alx_usex
+	</select>
+	<!-- ttms爱旅行用户访问量统计 -->
+	<select id="getAlxUserVisit" resultType="AlxVisit">
+		SELECT today,history
+		FROM my_page_view
+	</select>
+</mapper>

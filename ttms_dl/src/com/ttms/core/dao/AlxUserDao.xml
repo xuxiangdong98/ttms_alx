@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ttms.core.dao.AlxUserDao">
+
+	<!-- 用户登录 -->
+	<select id="findAlxUser" parameterType="String"
+		resultType="AlxUser">
+		select * from alx_user where alx_uname=#{alx_uname} and
+		alx_upassword=#{alx_upassword}
+	</select>
+
+	<!-- 用户名是否已存在校验 -->
+	<select id="findUname" parameterType="String"
+		resultType="AlxUser">
+		select alx_uname from alx_user where alx_uname=#{alx_uname}
+	</select>
+
+	<!-- 用户注册 -->
+	<insert id="insertAlxUser" parameterType="String">
+		insert into
+		alx_user(
+		alx_uname,
+		alx_upassword
+		)
+		values(
+		#{alx_uname},
+		#{alx_upassword}
+		)
+	</insert>
+
+	<!-- 预订单号，预定用户，景区名称、图片、价格、评分 -->
+	<!-- 根据预定用户id,景区名称查询订单信息 -->
+	<!-- 自定义手动映射类型 -->
+	<resultMap type="AlxScenic" id="AlxUserWithAlxScenicResult">
+		<id property="scenic_id" column="scenic_id" />
+		<result property="scenic_name" column="scenic_name" />
+		<result property="scenic_img" column="scenic_img" />
+		<result property="scenic_price" column="scenic_price" />
+		<result property="scenic_phone" column="scenic_phone" />
+		<result property="scenic_evaluate" column="scenic_evaluate" />
+		<result property="start" column="start" />
+		<result property="rows" column="rows" />
+		<!-- 多对多关联映射:collection -->
+		<collection property="alxUsers" ofType="AlxUser">
+			<id property="alx_uid" column="alx_uid" />
+			<result property="alx_uname" column="scenic_uname" />
+			<result property="alx_uid" column="scenic_uid" />
+		</collection>
+		<collection property="reserveScenics" ofType="ReserveScenic">
+			<id property="reserve_sid" column="reserve_sid" />
+			<result property="reserve_sid" column="scenic_rsid" />
+			<result property="reserve_valid" column="scenic_valid" />
+		</collection>
+	</resultMap>
+	<select id="findMyScenicList" parameterType="Integer"
+		resultMap="AlxUserWithAlxScenicResult">
+		select ar.alx_uname as scenic_uname ,ar.alx_uid as scenic_uid,ac.*,
+		rc.reserve_sid as scenic_rsid,rc.reserve_valid as scenic_valid
+		from alx_user ar,alx_scenic ac,reserve_scenic rc
+		where
+		rc.alx_uid=ar.alx_uid
+		and
+		rc.scenic_id=ac.scenic_id and
+		ar.alx_uid=#{alx_uid}
+		limit #{start},#{rows};
+	</select>
+
+	<!-- 根据项目名称查询项目总记录数 -->
+	<select id="findMyScenicListCount" parameterType="Integer" resultType="Integer">
+		select count(rc.scenic_id) 
+		from alx_scenic ac,alx_user ar,reserve_scenic rc 
+		where 
+		rc.scenic_id=ac.scenic_id and 
+		rc.alx_uid=ar.alx_uid and 
+		ar.alx_uid=#{alx_uid};
+	</select>
+	<!-- 分页count -->
+	<!-- select count(rc.scenic_id) from alx_scenic ac,alx_user ar,reserve_scenic 
+		rc where rc.scenic_id=ac.scenic_id and rc.alx_uid=ar.alx_uid and ar.alx_uid=2; -->
+	<!-- 通过id查景点 -->
+	<select id="getScenicById" parameterType="Integer"
+		resultType="AlxScenic">
+		select * from alx_scenic where scenic_id=#{scenic_id}
+	</select>
+	<!-- 取消预订 -->
+	<delete id="deleteScenicById" parameterType="Integer">
+		delete from reserve_scenic where reserve_sid = #{reserve_sid}
+	</delete>
+	
+	<!-- 已收藏 -->
+	<!-- 自定义手动映射类型 -->
+	<resultMap type="AlxScenic" id="AlxUserWithCollectScenicResult">
+		<id property="scenic_id" column="scenic_id" />
+		<result property="scenic_name" column="scenic_name" />
+		<result property="scenic_img" column="scenic_img" />
+		<result property="scenic_price" column="scenic_price" />
+		<result property="scenic_phone" column="scenic_phone" />
+		<result property="scenic_evaluate" column="scenic_evaluate" />
+		<result property="start" column="start" />
+		<result property="rows" column="rows" />
+		<!-- 多对多关联映射:collection -->
+		<collection property="alxUsers" ofType="AlxUser">
+			<id property="alx_uid" column="alx_uid" />
+			<result property="alx_uname" column="scenic_uname" />
+			<result property="alx_uid" column="scenic_uid" />
+		</collection>
+		<collection property="collectScenics" ofType="CollectScenic">
+			<id property="collect_cid" column="collect_cid" />
+			<result property="collect_cid" column="scenic_cid" />
+		</collection>
+	</resultMap>
+	<select id="findMyCollectScenicList" parameterType="Integer"
+		resultMap="AlxUserWithCollectScenicResult">
+		select ar.alx_uname as scenic_uname ,ar.alx_uid as scenic_uid,ac.*,
+		cs.collect_cid as scenic_cid
+		from alx_user ar,alx_scenic ac,collect_scenic cs
+		where
+		cs.alx_uid=ar.alx_uid
+		and
+		cs.scenic_id=ac.scenic_id 
+		and
+		ar.alx_uid=#{alx_uid}
+		limit #{start},#{rows};
+	</select>
+
+	<!-- 根据景点id查询景点总记录数 -->
+	<select id="findMyCollectScenicListCount" parameterType="Integer" resultType="Integer">
+		select count(cs.scenic_id) 
+		from alx_user ar,alx_scenic ac,collect_scenic cs
+		where 
+		cs.scenic_id=ac.scenic_id and 
+		cs.alx_uid=ar.alx_uid and 
+		ar.alx_uid=#{alx_uid};
+	</select>
+	<!-- 取消收藏 -->
+	<delete id="deleteCollectScenicById" parameterType="Integer">
+		delete from collect_scenic where collect_cid = #{collect_cid}
+	</delete>
+	
+	<!-- ttms爱旅行用户管理	 -->
+	<sql id="selectAlxUserListWhere">
+		<where>
+			<if test="alx_uname !=null">
+				alx_uname like "%"#{alx_uname}"%"
+			</if>
+		</where>
+	</sql>
+	<!-- ttms根据用户名称查询爱旅行用户列表	 -->
+	<select id="selectAlxUserList" parameterType="AlxUser" resultType="AlxUser">
+		select alx_uid,alx_uname,alx_upassword,alx_usex,alx_age,alx_ustate
+		from alx_user 
+		<include refid="selectAlxUserListWhere" />
+		<!-- 执行分页查询 -->
+		<if test="start !=null and rows !=null">
+			limit #{start},#{rows}
+		</if>
+	</select>
+	
+	<!--  ttms查询爱旅行用户列表总记录数	-->
+	<select id="selectAlxUserListCount" parameterType="AlxUser" resultType="Integer">
+		select count(*) from alx_user
+		<include refid="selectAlxUserListWhere" />
+	</select>
+	
+	<!-- 根据爱旅行用户id删除爱旅行用户 -->
+	<delete id="deleteAlxUser" parameterType="Integer">
+		delete from alx_user where alx_uid=#{alx_uid}
+	</delete>
+	
+	<!-- 添加爱旅行用户 -->
+	<insert id="createAlxUser" parameterType="AlxUser">
+		insert into alx_user(
+			alx_uname,
+			alx_upassword,
+			alx_usex,
+			alx_age,
+			alx_ustate
+		) 
+		values(
+			#{alx_uname},
+			#{alx_upassword},
+			#{alx_usex},
+			#{alx_age},
+			#{alx_ustate}
+		)
+	</insert>
+	<!-- 修改爱旅行用户，通过id查询爱旅行用户 -->
+	<select id="getAlxUserById" parameterType="Integer" resultType="AlxUser">
+		select * from alx_user where alx_uid=#{alx_uid}
+	</select>
+	<!-- 修改爱旅行用户,执行保存修改 -->
+	<update id="updateAlxUser" parameterType="AlxUser">
+		update alx_user
+		<set>
+			<if test="alx_uname !=null">
+				alx_uname=#{alx_uname},
+			</if>
+			<if test="alx_upassword !=null">
+	            alx_upassword=#{alx_upassword},
+	        </if>
+			<if test="alx_usex !=null">
+				alx_usex=#{alx_usex},
+			</if>
+			<if test="alx_age !=null">
+				alx_age=#{alx_age},
+			</if>
+			<if test="alx_ustate !=null">
+				alx_ustate=#{alx_ustate}
+			</if>
+		</set>
+		where alx_uid=#{alx_uid}
+	</update>
+	
+	<!--  -->
+	<!-- 批量删除爱旅行用户 -->
+	<delete id="deleteChecked">
+		delete from alx_user where alx_uid in
+		<foreach collection="array" item="d" index="no" 
+		open="(" separator="," close=")">
+			#{d}
+		</foreach>
+	</delete>
+	<!-- 批量禁用爱旅行用户 -->
+	<update id="updateStateNo">
+		update alx_user set alx_ustate=0
+		where alx_uid in
+		<foreach collection="array" item="d" index="no" 
+		open="(" separator="," close=")">
+			#{d}
+		</foreach>
+	</update>
+	
+	<!-- 批量启用爱旅行用户 -->
+	<update id="updateStateOk">
+		update alx_user set alx_ustate=1
+		where alx_uid in
+		<foreach collection="array" item="d" index="no" 
+		open="(" separator="," close=")">
+			#{d}
+		</foreach>
+	</update>
+	
+	<select id="getAllAlxUserCount" resultType="Integer">
+		select count(*) from alx_user;
+	</select>
+</mapper>

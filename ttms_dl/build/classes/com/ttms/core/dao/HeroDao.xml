@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace表示命名空间唯一 -->
+<mapper namespace="com.ttms.core.dao.HeroDao">
+	<select id="selectHeroList" resultType="Hero">
+		select * from champion
+	</select>
+	
+	<!-- 修改项目，通过id查询项目 -->
+	<select id="getHeroById" parameterType="Integer" resultType="Hero">
+		select * from champion where champion_id=#{champion_id}
+	</select>
+	
+	<!-- 添加英雄 -->
+	<insert id="createHero" parameterType="Hero">
+		insert into champion(
+			champion_icon,
+			champion_name,
+			champion_title,
+			champion_info,
+			champion_tags,
+			create_time
+		) 
+		values(
+			#{champion_icon},
+			#{champion_name},
+			#{champion_title},
+			#{champion_info},
+			#{champion_tags},
+			#{create_time}
+		)
+	</insert>
+	
+	<resultMap id="withPageViewResultMap" type="PageCounter">
+		<id column="id" property="id"></id>
+		<result column="today" property="today"></result>
+		<result column="history" property="history"></result>
+		<result column="today" property="today"></result>
+	</resultMap>
+	
+	<select id="findPageToday" parameterType="Integer" resultMap="withPageViewResultMap">
+		select * from my_page_view where id=#{id}
+	</select>
+	<!-- today加一 -->
+	<update id="updatePageCounter" parameterType="PageCounter">
+		update my_page_view 
+		<set>
+			<if test="pageCounter.today != null">
+				today=#{pageCounter.today},
+			</if>
+			<if test="pageCounter.history != null">
+				history=#{pageCounter.history},
+			</if>
+			<if test="pageCounter.currdate != null">
+				currdate=#{pageCounter.currdate}
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+</mapper>

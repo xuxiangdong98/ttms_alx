@@ -1,0 +1,84 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-4.3.xsd 
+    http://www.springframework.org/schema/mvc 
+    http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd 
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-4.3.xsd 
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	<!-- 加载属性文件 -->
+	<context:property-placeholder
+		location="classpath:resource.properties" />
+	<!-- 配置扫描器 -->
+	<context:component-scan
+		base-package="com.ttms.core.web.controller" />
+	<!-- 注解驱动：配置处理器映射器和适配器 -->
+	<mvc:annotation-driven />
+	<!--配置静态资源的访问映射，此配置中的文件，将不被前端控制器拦截 -->
+	<mvc:resources location="/js/" mapping="/js/**" />
+	<mvc:resources location="/css/" mapping="/css/**" />
+	<mvc:resources location="/fonts/" mapping="/fonts/**" />
+	<mvc:resources location="/img/" mapping="/img/**" />
+	<mvc:resources location="/bootstrap/"
+		mapping="/bootstrap/**" />
+	<!-- 配置视图解释器ViewResolver -->
+	<bean id="jspViewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- 配置拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/ttms/**" />
+			<mvc:exclude-mapping path="/toAlxindex.action" />
+			<mvc:exclude-mapping path="/toAlxregister.action" />
+			<mvc:exclude-mapping path="/alxregist.action" />
+			<mvc:exclude-mapping
+				path="/alx/checkUname.action" />
+			<mvc:exclude-mapping path="/alx/alxregist.action" />
+			<mvc:exclude-mapping path="/toLogin.action" />
+			<bean class="com.ttms.core.interceptor.LoginInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/alx/**" />
+			<mvc:exclude-mapping path="/toAlxindex.action" />
+			<mvc:exclude-mapping path="/toAlxregister.action" />
+			<mvc:exclude-mapping path="/alxregist.action" />
+			<mvc:exclude-mapping
+				path="/alx/checkUname.action" />
+			<mvc:exclude-mapping path="/alx/alxregist.action" />
+			<mvc:exclude-mapping path="/toLogin.action" />
+			<bean class="com.ttms.core.interceptor.AlxLoginInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- 注册MyFormatter -->
+	<bean id="conversionService"
+		class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="formatters">
+			<set>
+				<bean class="com.ttms.common.utils.MyFormatter" />
+			</set>
+		</property>
+	</bean>
+	<mvc:annotation-driven
+		conversion-service="conversionService" />
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="maxUploadSize" value="2097152" />
+	</bean>
+</beans>
